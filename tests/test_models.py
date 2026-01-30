@@ -1,6 +1,5 @@
 """Tests for Stack Forge."""
 
-import pytest
 from stack_forge.models import StackConfig, CloudProvider, Environment
 
 
