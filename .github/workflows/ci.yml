@@ -25,8 +25,8 @@ jobs:
       
       - name: Lint with ruff
         run: |
-          ruff check src/ --fix
-          ruff format src/
+          ruff check src/
+          ruff format src/ --check
       
       - name: Run tests
         run: |
