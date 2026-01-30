@@ -1,0 +1,65 @@
+# Example Stack Forge configuration
+
+version: "1.0"
+name: example-platform
+organization: mycompany
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+  - staging
+  - prod
+
+stacks:
+  # Network stack for dev environment
+  - name: network
+    description: Core networking infrastructure
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: main-vpc
+        type: vpc
+        variables:
+          vpc_cidr: "10.0.0.0/16"
+          az_count: 3
+          enable_nat_gateway: true
+          single_nat_gateway: true  # Cost savings for dev
+          enable_flow_logs: true
+        
+      - name: app-logs
+        type: s3_bucket
+        variables:
+          versioning_enabled: true
+        
+  # Data stack
+  - name: data
+    description: Data storage infrastructure
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: data-lake
+        type: s3_bucket
+        variables:
+          versioning_enabled: true
+          
+  # Kubernetes stack
+  - name: kubernetes
+    description: EKS cluster for applications
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: main-cluster
+        type: eks
+        variables:
+          kubernetes_version: "1.29"
+          endpoint_private_access: true
+          endpoint_public_access: true
+        depends_on:
+          - network.main-vpc
+
+global_tags:
+  Team: platform
+  CostCenter: engineering
