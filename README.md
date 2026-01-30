@@ -23,7 +23,7 @@ A CLI tool that generates production-ready Terraform and Terragrunt configuratio
 
 ```bash
 # Clone the repository
-git clone https://github.com/praneethturlapati/stack-forge.git
+git clone https://github.com/pt1691/stack-forge.git
 cd stack-forge
 
 # Create virtual environment
