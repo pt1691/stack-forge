@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 class CloudProvider(str, Enum):
     """Supported cloud providers."""
+
     AWS = "aws"
     GCP = "gcp"
     AZURE = "azure"
@@ -16,6 +17,7 @@ class CloudProvider(str, Enum):
 
 class Environment(str, Enum):
     """Standard deployment environments."""
+
     DEV = "dev"
     STAGING = "staging"
     PROD = "prod"
@@ -23,6 +25,7 @@ class Environment(str, Enum):
 
 class ResourceType(str, Enum):
     """Supported AWS resource types."""
+
     VPC = "vpc"
     SUBNET = "subnet"
     SECURITY_GROUP = "security_group"
@@ -39,6 +42,7 @@ class ResourceType(str, Enum):
 
 class VariableType(str, Enum):
     """Terraform variable types."""
+
     STRING = "string"
     NUMBER = "number"
     BOOL = "bool"
@@ -49,6 +53,7 @@ class VariableType(str, Enum):
 
 class Variable(BaseModel):
     """Terraform variable definition."""
+
     name: str
     type: VariableType = VariableType.STRING
     description: str = ""
@@ -60,6 +65,7 @@ class Variable(BaseModel):
 
 class Output(BaseModel):
     """Terraform output definition."""
+
     name: str
     description: str = ""
     value: str
@@ -68,6 +74,7 @@ class Output(BaseModel):
 
 class ResourceConfig(BaseModel):
     """Configuration for a single resource."""
+
     name: str
     type: ResourceType
     enabled: bool = True
@@ -78,30 +85,31 @@ class ResourceConfig(BaseModel):
 
 class StackConfig(BaseModel):
     """Configuration for an infrastructure stack."""
+
     name: str = Field(..., description="Unique stack name")
     description: str = ""
     provider: CloudProvider = CloudProvider.AWS
     region: str = Field(default="us-west-2")
     environment: Environment = Environment.DEV
-    
+
     # Organization/Project settings
     organization: str = Field(default="myorg")
     project: str = Field(default="myproject")
-    
+
     # Resources to include
     resources: list[ResourceConfig] = Field(default_factory=list)
-    
+
     # Global tags applied to all resources
     global_tags: dict[str, str] = Field(default_factory=dict)
-    
+
     # Backend configuration
     backend_type: str = "s3"
     backend_config: dict[str, str] = Field(default_factory=dict)
-    
+
     # Terragrunt settings
     use_terragrunt: bool = True
     terragrunt_source: str | None = None
-    
+
     def get_default_tags(self) -> dict[str, str]:
         """Get default tags with stack metadata."""
         return {
@@ -109,51 +117,53 @@ class StackConfig(BaseModel):
             "Project": self.project,
             "Organization": self.organization,
             "ManagedBy": "stack-forge",
-            **self.global_tags
+            **self.global_tags,
         }
 
 
 class TemplateMetadata(BaseModel):
     """Metadata for an infrastructure template."""
+
     name: str
     description: str
     version: str = "1.0.0"
     author: str = ""
     provider: CloudProvider = CloudProvider.AWS
     resource_type: ResourceType
-    
+
     # Template requirements
     required_variables: list[Variable] = Field(default_factory=list)
     optional_variables: list[Variable] = Field(default_factory=list)
     outputs: list[Output] = Field(default_factory=list)
-    
+
     # Dependencies
     dependencies: list[str] = Field(default_factory=list)
-    
+
     # Tags
     tags: list[str] = Field(default_factory=list)
 
 
 class ProjectConfig(BaseModel):
     """Stack Forge project configuration (forge.yaml)."""
+
     version: str = "1.0"
     name: str
     organization: str
-    
+
     # Default settings
     default_provider: CloudProvider = CloudProvider.AWS
     default_region: str = "us-west-2"
-    
+
     # Environments
     environments: list[Environment] = Field(
         default_factory=lambda: [Environment.DEV, Environment.STAGING, Environment.PROD]
     )
-    
+
     # Stacks
     stacks: list[StackConfig] = Field(default_factory=list)
-    
+
     # Output directory
     output_dir: Path = Field(default=Path("infrastructure"))
-    
+
     # Terragrunt settings
     terragrunt_root: Path = Field(default=Path("terragrunt"))
