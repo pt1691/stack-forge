@@ -9,6 +9,27 @@
 
 A CLI tool that generates production-ready Terraform and Terragrunt configurations from reusable templates. Stop writing boilerplate infrastructure code and start deploying in minutes.
 
+## ⚡ 30-Second Quick Start
+
+```bash
+git clone https://github.com/pt1691/stack-forge.git && cd stack-forge
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e .
+forge list-templates  # See available templates!
+```
+
+**That's it!** Now create your first infrastructure:
+
+```bash
+mkdir my-infra && cd my-infra
+forge init --name my-app --org mycompany
+forge add-stack --name network --env dev
+forge add-resource --stack network --name main-vpc --type vpc
+forge generate  # Creates Terraform files!
+```
+
+---
+
 ## ✨ Features
 
 - 🚀 **Quick Setup** - Generate complete infrastructure stacks with a few commands
@@ -18,40 +39,34 @@ A CLI tool that generates production-ready Terraform and Terragrunt configuratio
 - 🔒 **Security Best Practices** - Templates follow AWS security guidelines
 - 📝 **Customizable** - Extend with your own templates
 
-## 🚀 Quick Start
-
-### Installation
+## 🚀 Installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/pt1691/stack-forge.git
 cd stack-forge
-
-# Create virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
-
-# Install
 pip install -e .
 ```
 
-### Create Your First Infrastructure
+## 📖 Workflow Example
 
 ```bash
-# Initialize a new project
-forge init --name my-platform --org mycompany
+# 1. Create a new project
+mkdir my-platform && cd my-platform
+forge init --name my-platform --org acmecorp
 
-# Add a network stack
+# 2. Add a stack (environment + resource group)
 forge add-stack --name network --env dev
 
-# Add resources to the stack
+# 3. Add resources to the stack
 forge add-resource --stack network --name main-vpc --type vpc
 forge add-resource --stack network --name logs --type s3_bucket
 
-# Generate Terraform files
+# 4. Generate Terraform files
 forge generate
 
-# Review generated files
+# 5. Review what was created
 tree infrastructure/
 ```
 
