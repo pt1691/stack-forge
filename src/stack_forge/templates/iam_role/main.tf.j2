@@ -25,14 +25,11 @@ resource "aws_iam_role" "this" {
         }
         Action = "sts:AssumeRole"
 
-        dynamic "Condition" {
-          for_each = var.assume_role_condition_operator != "" ? [1] : []
-          content {
-            "${var.assume_role_condition_operator}" = {
-              "${var.assume_role_condition_key}" = var.assume_role_condition_values
-            }
+        Condition = var.assume_role_condition_operator != "" ? {
+          "${var.assume_role_condition_operator}" = {
+            "${var.assume_role_condition_key}" = var.assume_role_condition_values
           }
-        }
+        } : null
       }
     ]
   })
