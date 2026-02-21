@@ -1,13 +1,13 @@
 """Configuration models for Stack Forge."""
 
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class CloudProvider(str, Enum):
+class CloudProvider(StrEnum):
     """Supported cloud providers."""
 
     AWS = "aws"
@@ -15,7 +15,7 @@ class CloudProvider(str, Enum):
     AZURE = "azure"
 
 
-class Environment(str, Enum):
+class Environment(StrEnum):
     """Standard deployment environments."""
 
     DEV = "dev"
@@ -23,7 +23,7 @@ class Environment(str, Enum):
     PROD = "prod"
 
 
-class ResourceType(str, Enum):
+class ResourceType(StrEnum):
     """Supported AWS resource types."""
 
     VPC = "vpc"
@@ -40,7 +40,7 @@ class ResourceType(str, Enum):
     CLOUDWATCH = "cloudwatch"
 
 
-class VariableType(str, Enum):
+class VariableType(StrEnum):
     """Terraform variable types."""
 
     STRING = "string"
