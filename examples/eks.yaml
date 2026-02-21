@@ -23,6 +23,4 @@ stacks:
           endpoint_private_access: true
           endpoint_public_access: true   # Set false for production
           # vpc_id and subnet_ids are required — pass at terraform apply time
-          # or wire them from a VPC stack with depends_on
-        depends_on:
-          - network.main-vpc             # Reference a VPC resource in another stack
+          # or wire them from a VPC stack via variables/outputs

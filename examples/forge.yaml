@@ -72,8 +72,7 @@ stacks:
           kubernetes_version: "1.29"
           endpoint_private_access: true
           endpoint_public_access: true
-        depends_on:
-          - network.main-vpc
+          # Cross-stack deps are wired via variables (vpc_id, subnet_ids), not depends_on.
 
       - name: app-images
         type: ecr
@@ -104,8 +103,7 @@ stacks:
           backup_retention_period: 3
           skip_final_snapshot: true
           deletion_protection: false
-        depends_on:
-          - network.main-vpc
+          # Cross-stack deps are wired via variables (vpc_id, subnet_ids), not depends_on.
 
       - name: sessions-table
         type: dynamodb

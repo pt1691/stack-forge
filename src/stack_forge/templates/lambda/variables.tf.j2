@@ -108,9 +108,9 @@ variable "dead_letter_target_arn" {
 }
 
 variable "reserved_concurrent_executions" {
-  description = "Reserved concurrent executions (-1 for unreserved)"
+  description = "Reserved concurrent executions (null for unreserved)"
   type        = number
-  default     = {{ variables.get('reserved_concurrent_executions', -1) }}
+  default     = {{ variables.get('reserved_concurrent_executions', 'null') }}
 }
 
 variable "log_retention_days" {

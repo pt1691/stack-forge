@@ -152,8 +152,7 @@ stacks:
           monitoring_interval: 0
           performance_insights_enabled: false
           parameter_group_family: "postgres16"
-        depends_on:
-          - network.main-vpc
+          # Cross-stack deps are wired via variables (vpc_id, subnet_ids), not depends_on.
 
       - name: sessions
         type: dynamodb
@@ -223,8 +222,7 @@ stacks:
           kubernetes_version: "1.29"
           endpoint_private_access: true
           endpoint_public_access: true
-        depends_on:
-          - network.main-vpc
+          # Cross-stack deps are wired via variables (vpc_id, subnet_ids), not depends_on.
 
   # ── 8. Serverless ──────────────────────────────────────────────────────────
   - name: serverless
