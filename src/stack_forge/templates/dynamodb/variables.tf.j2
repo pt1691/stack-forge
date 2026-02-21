@@ -78,8 +78,13 @@ variable "global_secondary_indexes" {
 
 variable "local_secondary_indexes" {
   description = "Local secondary indexes"
-  type        = list(map(string))
-  default     = []
+  type = list(object({
+    name               = string
+    range_key          = string
+    projection_type    = optional(string)
+    non_key_attributes = optional(list(string))
+  }))
+  default = []
 }
 
 variable "point_in_time_recovery_enabled" {
