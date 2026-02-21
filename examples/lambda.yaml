@@ -1,0 +1,64 @@
+# Lambda Example
+# Creates Lambda functions with IAM roles, CloudWatch logs, and alarms
+
+version: "1.0"
+name: lambda-example
+organization: mycompany
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+
+stacks:
+  - name: serverless
+    description: Serverless functions
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      # Simple API handler
+      - name: api-handler
+        type: lambda
+        variables:
+          runtime: "python3.12"
+          handler: "main.handler"
+          timeout: 30
+          memory_size: 256
+          architecture: "arm64"
+          description: "API request handler"
+          tracing_mode: "Active"
+          log_retention_days: 14
+          create_error_alarm: true
+          error_alarm_threshold: 5
+
+      # Background worker — VPC-enabled, higher memory
+      - name: data-processor
+        type: lambda
+        variables:
+          runtime: "python3.12"
+          handler: "processor.handle"
+          timeout: 300
+          memory_size: 1024
+          architecture: "arm64"
+          description: "Background data processing worker"
+          vpc_config_enabled: true
+          tracing_mode: "Active"
+          log_retention_days: 30
+          reserved_concurrent_executions: 10
+          create_function_url: false
+          create_error_alarm: true
+          error_alarm_threshold: 1
+
+      # Public function with Function URL
+      - name: webhook-receiver
+        type: lambda
+        variables:
+          runtime: "nodejs20.x"
+          handler: "index.handler"
+          timeout: 10
+          memory_size: 128
+          architecture: "arm64"
+          description: "Incoming webhook receiver"
+          create_function_url: true
+          function_url_auth_type: "NONE"
+          log_retention_days: 7

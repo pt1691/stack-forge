@@ -1,0 +1,34 @@
+# Security Group Example
+# Creates security groups with configurable ingress/egress rules
+
+version: "1.0"
+name: security-group-example
+organization: mycompany
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+
+stacks:
+  - name: security
+    description: Security groups
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      # Web application security group
+      - name: web-app-sg
+        type: security_group
+        variables:
+          description: "Security group for web application servers"
+          # vpc_id is required — pass at terraform apply time
+          # ingress_rules and egress_rules are passed at apply time as well
+          # Default: allows HTTPS (443) inbound and all outbound
+
+      # Database security group (restrict inbound to app tier)
+      - name: database-sg
+        type: security_group
+        variables:
+          description: "Security group for database instances"
+          # Typically you reference source_security_group_id from the app SG
+          # at terraform apply time to restrict DB access to the app layer

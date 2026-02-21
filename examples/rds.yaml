@@ -1,0 +1,66 @@
+# RDS Example
+# Creates a PostgreSQL RDS instance with Multi-AZ, encryption, and monitoring
+
+version: "1.0"
+name: rds-example
+organization: mycompany
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+  - prod
+
+stacks:
+  # Dev database — single-AZ, smaller instance, relaxed deletion
+  - name: database
+    description: Application database (dev)
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: app-db
+        type: rds
+        variables:
+          engine: "postgres"
+          engine_version: "16.3"
+          instance_class: "db.t3.medium"
+          allocated_storage: 20
+          max_allocated_storage: 100
+          database_name: "appdb"
+          master_username: "dbadmin"
+          multi_az: false                     # Save cost in dev
+          backup_retention_period: 3
+          skip_final_snapshot: true
+          deletion_protection: false
+          monitoring_interval: 0              # Disable enhanced monitoring in dev
+          performance_insights_enabled: false
+          parameter_group_family: "postgres16"
+
+  # Production database — Multi-AZ, larger instance, full monitoring
+  - name: database
+    description: Application database (prod)
+    environment: prod
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: app-db
+        type: rds
+        variables:
+          engine: "postgres"
+          engine_version: "16.3"
+          instance_class: "db.r6g.large"
+          allocated_storage: 100
+          max_allocated_storage: 500
+          storage_type: "gp3"
+          database_name: "appdb"
+          master_username: "dbadmin"
+          multi_az: true
+          backup_retention_period: 14
+          backup_window: "03:00-04:00"
+          maintenance_window: "sun:04:00-sun:05:00"
+          skip_final_snapshot: false
+          deletion_protection: true
+          monitoring_interval: 60
+          performance_insights_enabled: true
+          auto_minor_version_upgrade: true
+          parameter_group_family: "postgres16"

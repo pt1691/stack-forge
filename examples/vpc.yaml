@@ -1,0 +1,27 @@
+# VPC Example
+# Creates a VPC with public/private subnets, NAT gateways, and flow logs
+
+version: "1.0"
+name: vpc-example
+organization: mycompany
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+
+stacks:
+  - name: network
+    description: Core VPC networking
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: main-vpc
+        type: vpc
+        variables:
+          vpc_cidr: "10.0.0.0/16"
+          az_count: 3
+          enable_nat_gateway: true
+          single_nat_gateway: true     # Use one NAT GW to save cost in dev
+          enable_flow_logs: true
+          flow_logs_retention_days: 30
