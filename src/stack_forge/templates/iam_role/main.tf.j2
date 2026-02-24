@@ -18,7 +18,7 @@ resource "aws_iam_role" "this" {
     Statement = [
       {
         Effect = "Allow"
-        Principal = var.trusted_role_arns != [] ? {
+        Principal = length(var.trusted_role_arns) > 0 ? {
           AWS = var.trusted_role_arns
         } : {
           Service = var.trusted_services

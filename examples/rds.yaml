@@ -12,7 +12,7 @@ environments:
 
 stacks:
   # Dev database — single-AZ, smaller instance, relaxed deletion
-  - name: database
+  - name: database-dev
     description: Application database (dev)
     environment: dev
     region: us-west-2
@@ -37,7 +37,7 @@ stacks:
           parameter_group_family: "postgres16"
 
   # Production database — Multi-AZ, larger instance, full monitoring
-  - name: database
+  - name: database-prod
     description: Application database (prod)
     environment: prod
     region: us-west-2
