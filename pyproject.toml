@@ -3,7 +3,7 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
-name = "stack-forge"
+name = "stack-forge-infra"
 dynamic = ["version"]
 description = "Self-Service Infrastructure Templating Engine for Terraform & Terragrunt"
 readme = "README.md"

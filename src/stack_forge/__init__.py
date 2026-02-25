@@ -12,7 +12,7 @@ except ImportError:
     try:
         # Fallback: installed wheel has this in package metadata
         from importlib.metadata import version, PackageNotFoundError
-        __version__ = version("stack-forge")
+        __version__ = version("stack-forge-infra")
     except (ImportError, PackageNotFoundError):
         __version__ = "0.0.0.dev0"
 

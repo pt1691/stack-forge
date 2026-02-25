@@ -102,7 +102,7 @@ jobs:
     needs: build
     environment:
       name: pypi
-      url: https://pypi.org/p/stack-forge
+      url: https://pypi.org/p/stack-forge-infra
     steps:
       - name: Download dist artifacts
         uses: actions/download-artifact@v4
@@ -113,7 +113,7 @@ jobs:
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         # Uses OIDC trusted publishing — no API token needed.
-        # Configure a trusted publisher at https://pypi.org/manage/project/stack-forge/settings/publishing/
+        # Configure a trusted publisher at https://pypi.org/manage/project/stack-forge-infra/settings/publishing/
         # with: publisher = GitHub Actions, workflow = release.yml, environment = pypi
 
   # ── 5. Create GitHub Release ──────────────────────────────────────────────

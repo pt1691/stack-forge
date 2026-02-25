@@ -5,7 +5,7 @@ tag to `origin` triggers the release workflow which:
 
 1. Runs the full test suite (Python 3.12 & 3.13)
 2. Builds the wheel and source distribution
-3. Publishes to [PyPI](https://pypi.org/p/stack-forge)
+3. Publishes to [PyPI](https://pypi.org/p/stack-forge-infra)
 4. Creates a GitHub Release with auto-generated notes and the dist artifacts attached
 
 ---
@@ -78,7 +78,7 @@ git push origin :refs/tags/v0.1.1
 The release workflow uses OIDC (no long-lived API tokens). Configure the
 trusted publisher on PyPI **once**:
 
-1. Go to <https://pypi.org/manage/project/stack-forge/settings/publishing/>
+1. Go to <https://pypi.org/manage/project/stack-forge-infra/settings/publishing/>
 2. Add a **GitHub Actions** publisher with:
    - **Owner:** `pt1691`
    - **Repository:** `stack-forge`
