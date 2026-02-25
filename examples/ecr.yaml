@@ -1,0 +1,48 @@
+# ECR Example
+# Creates container registries with lifecycle policies and image scanning
+
+version: "1.0"
+name: ecr-example
+organization: mycompany
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+
+stacks:
+  - name: container-registry
+    description: ECR repositories for container images
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      # Application image repository
+      - name: app-api
+        type: ecr
+        variables:
+          image_tag_mutability: "IMMUTABLE"
+          scan_on_push: true
+          enable_lifecycle_policy: true
+          untagged_image_expiry_days: 14
+          max_tagged_image_count: 50
+
+      # Worker image repository — mutable tags for dev convenience
+      - name: worker
+        type: ecr
+        variables:
+          image_tag_mutability: "MUTABLE"
+          scan_on_push: true
+          force_delete: true             # Allow cleanup in dev
+          enable_lifecycle_policy: true
+          untagged_image_expiry_days: 7
+          max_tagged_image_count: 20
+
+      # Base image repository
+      - name: base-images
+        type: ecr
+        variables:
+          image_tag_mutability: "IMMUTABLE"
+          scan_on_push: true
+          enable_lifecycle_policy: true
+          untagged_image_expiry_days: 30
+          max_tagged_image_count: 100

@@ -1,0 +1,281 @@
+# Full Production Stack Example
+# ─────────────────────────────────────────────────────────────────────────────
+# A realistic, production-grade AWS platform using every Stack Forge template.
+# Copy this file as forge.yaml and customise the values for your environment.
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: "1.0"
+name: acme-platform
+organization: acmecorp
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+  - staging
+  - prod
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  DEV  STACKS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+stacks:
+  # ── 1. Networking ──────────────────────────────────────────────────────────
+  - name: network
+    description: VPC, subnets, NAT gateways, and security groups
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: main-vpc
+        type: vpc
+        variables:
+          vpc_cidr: "10.0.0.0/16"
+          az_count: 3
+          enable_nat_gateway: true
+          single_nat_gateway: true
+          enable_flow_logs: true
+          flow_logs_retention_days: 14
+
+      - name: web-sg
+        type: security_group
+        variables:
+          description: "Public-facing web tier — allows 80/443 inbound"
+
+      - name: app-sg
+        type: security_group
+        variables:
+          description: "Internal application tier"
+
+      - name: db-sg
+        type: security_group
+        variables:
+          description: "Database tier — app SG inbound only"
+
+  # ── 2. IAM ────────────────────────────────────────────────────────────────
+  - name: iam
+    description: IAM roles for workloads
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: app-server-role
+        type: iam_role
+        variables:
+          description: "EC2 application server role"
+          trusted_services:
+            - "ec2.amazonaws.com"
+          create_instance_profile: true
+
+      - name: lambda-exec-role
+        type: iam_role
+        variables:
+          description: "Lambda execution role"
+          trusted_services:
+            - "lambda.amazonaws.com"
+
+      - name: ci-deploy-role
+        type: iam_role
+        variables:
+          description: "CI/CD deployment role"
+          trusted_services:
+            - "codebuild.amazonaws.com"
+          max_session_duration: 7200
+
+  # ── 3. Storage ─────────────────────────────────────────────────────────────
+  - name: storage
+    description: S3 buckets
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: app-assets
+        type: s3_bucket
+        variables:
+          bucket_name_prefix: "acme-app-assets"
+          versioning_enabled: true
+
+      - name: access-logs
+        type: s3_bucket
+        variables:
+          bucket_name_prefix: "acme-access-logs"
+          versioning_enabled: false
+
+      - name: data-lake
+        type: s3_bucket
+        variables:
+          bucket_name_prefix: "acme-data-lake"
+          versioning_enabled: true
+
+  # ── 4. Secrets ─────────────────────────────────────────────────────────────
+  - name: secrets
+    description: Application secrets
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: db-credentials
+        type: secrets_manager
+        variables:
+          secret_path: "database/credentials"
+          description: "RDS master credentials"
+          recovery_window_in_days: 7
+
+      - name: api-keys
+        type: secrets_manager
+        variables:
+          secret_path: "integrations/api-keys"
+          description: "Third-party API keys"
+          recovery_window_in_days: 7
+          enable_rotation: false
+
+  # ── 5. Database ────────────────────────────────────────────────────────────
+  - name: database
+    description: Relational and NoSQL data stores
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: primary-db
+        type: rds
+        variables:
+          engine: "postgres"
+          engine_version: "16.3"
+          instance_class: "db.t3.medium"
+          allocated_storage: 20
+          max_allocated_storage: 100
+          database_name: "acmedb"
+          master_username: "dbadmin"
+          multi_az: false
+          backup_retention_period: 3
+          skip_final_snapshot: true
+          deletion_protection: false
+          monitoring_interval: 0
+          performance_insights_enabled: false
+          parameter_group_family: "postgres16"
+          # Cross-stack deps are wired via variables (vpc_id, subnet_ids), not depends_on.
+
+      - name: sessions
+        type: dynamodb
+        variables:
+          billing_mode: "PAY_PER_REQUEST"
+          hash_key: "session_id"
+          hash_key_type: "S"
+          ttl_attribute_name: "expires_at"
+          point_in_time_recovery_enabled: true
+
+      - name: audit-events
+        type: dynamodb
+        variables:
+          billing_mode: "PAY_PER_REQUEST"
+          hash_key: "entity_id"
+          hash_key_type: "S"
+          range_key: "timestamp"
+          range_key_type: "N"
+          stream_enabled: true
+          stream_view_type: "NEW_AND_OLD_IMAGES"
+          point_in_time_recovery_enabled: true
+
+  # ── 6. Container Registry ─────────────────────────────────────────────────
+  - name: container-registry
+    description: ECR repositories for container images
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: api-service
+        type: ecr
+        variables:
+          image_tag_mutability: "IMMUTABLE"
+          scan_on_push: true
+          enable_lifecycle_policy: true
+          untagged_image_expiry_days: 7
+          max_tagged_image_count: 30
+
+      - name: worker-service
+        type: ecr
+        variables:
+          image_tag_mutability: "IMMUTABLE"
+          scan_on_push: true
+          enable_lifecycle_policy: true
+          untagged_image_expiry_days: 7
+          max_tagged_image_count: 30
+
+      - name: base-images
+        type: ecr
+        variables:
+          image_tag_mutability: "IMMUTABLE"
+          scan_on_push: true
+          enable_lifecycle_policy: true
+          untagged_image_expiry_days: 30
+          max_tagged_image_count: 100
+
+  # ── 7. Kubernetes ──────────────────────────────────────────────────────────
+  - name: kubernetes
+    description: EKS cluster
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: main-cluster
+        type: eks
+        variables:
+          kubernetes_version: "1.29"
+          endpoint_private_access: true
+          endpoint_public_access: true
+          # Cross-stack deps are wired via variables (vpc_id, subnet_ids), not depends_on.
+
+  # ── 8. Serverless ──────────────────────────────────────────────────────────
+  - name: serverless
+    description: Lambda functions
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: api-handler
+        type: lambda
+        variables:
+          runtime: "python3.12"
+          handler: "main.handler"
+          timeout: 30
+          memory_size: 256
+          architecture: "arm64"
+          description: "REST API handler"
+          tracing_mode: "Active"
+          log_retention_days: 14
+          create_error_alarm: true
+          error_alarm_threshold: 5
+
+      - name: event-processor
+        type: lambda
+        variables:
+          runtime: "python3.12"
+          handler: "processor.handle"
+          timeout: 300
+          memory_size: 1024
+          architecture: "arm64"
+          description: "DynamoDB stream event processor"
+          vpc_config_enabled: true
+          tracing_mode: "Active"
+          log_retention_days: 30
+          reserved_concurrent_executions: 10
+          create_error_alarm: true
+          error_alarm_threshold: 1
+
+      - name: webhook-receiver
+        type: lambda
+        variables:
+          runtime: "nodejs20.x"
+          handler: "index.handler"
+          timeout: 10
+          memory_size: 128
+          architecture: "arm64"
+          description: "Incoming webhook endpoint"
+          create_function_url: true
+          function_url_auth_type: "NONE"
+          log_retention_days: 7
+          create_error_alarm: true
+
+global_tags:
+  Team: platform-engineering
+  CostCenter: eng-infra
+  ManagedBy: stack-forge

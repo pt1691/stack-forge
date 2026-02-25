@@ -1,0 +1,26 @@
+# EKS Cluster Example
+# Creates a managed Kubernetes cluster with node groups, IRSA, and encryption
+
+version: "1.0"
+name: eks-example
+organization: mycompany
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+
+stacks:
+  - name: kubernetes
+    description: EKS cluster for applications
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: app-cluster
+        type: eks
+        variables:
+          kubernetes_version: "1.29"
+          endpoint_private_access: true
+          endpoint_public_access: true   # Set false for production
+          # vpc_id and subnet_ids are required — pass at terraform apply time
+          # or wire them from a VPC stack via variables/outputs

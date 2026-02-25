@@ -1,4 +1,6 @@
-# Example Stack Forge configuration
+# Example Stack Forge Configuration
+# Demonstrates every available resource type in a realistic project layout.
+# See the examples/ directory for individual resource-type examples.
 
 version: "1.0"
 name: example-platform
@@ -11,7 +13,7 @@ environments:
   - prod
 
 stacks:
-  # Network stack for dev environment
+  # ── Networking ─────────────────────────────────────────────────────────
   - name: network
     description: Core networking infrastructure
     environment: dev
@@ -24,27 +26,40 @@ stacks:
           vpc_cidr: "10.0.0.0/16"
           az_count: 3
           enable_nat_gateway: true
-          single_nat_gateway: true  # Cost savings for dev
+          single_nat_gateway: true       # Cost savings for dev
           enable_flow_logs: true
-        
-      - name: app-logs
-        type: s3_bucket
+          flow_logs_retention_days: 30
+
+      - name: app-sg
+        type: security_group
         variables:
-          versioning_enabled: true
-        
-  # Data stack
-  - name: data
-    description: Data storage infrastructure
+          description: "Application-tier security group"
+
+      - name: db-sg
+        type: security_group
+        variables:
+          description: "Database-tier security group"
+
+  # ── Storage ────────────────────────────────────────────────────────────
+  - name: storage
+    description: S3 buckets and data stores
     environment: dev
     region: us-west-2
     use_terragrunt: true
     resources:
+      - name: app-logs
+        type: s3_bucket
+        variables:
+          bucket_name_prefix: "mycompany-app-logs"
+          versioning_enabled: true
+
       - name: data-lake
         type: s3_bucket
         variables:
+          bucket_name_prefix: "mycompany-data-lake"
           versioning_enabled: true
-          
-  # Kubernetes stack
+
+  # ── Kubernetes ─────────────────────────────────────────────────────────
   - name: kubernetes
     description: EKS cluster for applications
     environment: dev
@@ -57,8 +72,89 @@ stacks:
           kubernetes_version: "1.29"
           endpoint_private_access: true
           endpoint_public_access: true
-        depends_on:
-          - network.main-vpc
+          # Cross-stack deps are wired via variables (vpc_id, subnet_ids), not depends_on.
+
+      - name: app-images
+        type: ecr
+        variables:
+          image_tag_mutability: "IMMUTABLE"
+          scan_on_push: true
+          enable_lifecycle_policy: true
+          untagged_image_expiry_days: 14
+          max_tagged_image_count: 50
+
+  # ── Database ───────────────────────────────────────────────────────────
+  - name: database
+    description: Relational and NoSQL databases
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: app-db
+        type: rds
+        variables:
+          engine: "postgres"
+          engine_version: "16.3"
+          instance_class: "db.t3.medium"
+          allocated_storage: 20
+          max_allocated_storage: 100
+          database_name: "appdb"
+          multi_az: false
+          backup_retention_period: 3
+          skip_final_snapshot: true
+          deletion_protection: false
+          # Cross-stack deps are wired via variables (vpc_id, subnet_ids), not depends_on.
+
+      - name: sessions-table
+        type: dynamodb
+        variables:
+          billing_mode: "PAY_PER_REQUEST"
+          hash_key: "session_id"
+          hash_key_type: "S"
+          ttl_attribute_name: "expires_at"
+          point_in_time_recovery_enabled: true
+
+  # ── Serverless ─────────────────────────────────────────────────────────
+  - name: serverless
+    description: Lambda functions
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: api-handler
+        type: lambda
+        variables:
+          runtime: "python3.12"
+          handler: "main.handler"
+          timeout: 30
+          memory_size: 256
+          architecture: "arm64"
+          tracing_mode: "Active"
+          log_retention_days: 14
+          create_error_alarm: true
+
+  # ── IAM & Secrets ──────────────────────────────────────────────────────
+  - name: iam-and-secrets
+    description: IAM roles and secrets
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      - name: app-role
+        type: iam_role
+        variables:
+          description: "Application server role"
+          trusted_services:
+            - "ec2.amazonaws.com"
+          create_instance_profile: true
+
+      - name: db-credentials
+        type: secrets_manager
+        variables:
+          secret_path: "database/credentials"
+          description: "Database credentials"
+          recovery_window_in_days: 30
+          enable_rotation: false
 
 global_tags:
   Team: platform

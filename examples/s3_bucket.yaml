@@ -1,0 +1,32 @@
+# S3 Bucket Example
+# Creates an S3 bucket with versioning, encryption, and lifecycle rules
+
+version: "1.0"
+name: s3-example
+organization: mycompany
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+
+stacks:
+  - name: storage
+    description: S3 storage resources
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      # Application logs bucket
+      - name: app-logs
+        type: s3_bucket
+        variables:
+          bucket_name_prefix: "mycompany-app-logs"
+          versioning_enabled: true
+
+      # Data lake bucket with KMS encryption
+      - name: data-lake
+        type: s3_bucket
+        variables:
+          bucket_name_prefix: "mycompany-data-lake"
+          versioning_enabled: true
+          # kms_key_id: "arn:aws:kms:us-west-2:123456789012:key/example-key-id"

@@ -1,0 +1,44 @@
+# IAM Role Example
+# Creates IAM roles with customizable trust policies and permissions
+
+version: "1.0"
+name: iam-role-example
+organization: mycompany
+default_provider: aws
+default_region: us-west-2
+environments:
+  - dev
+
+stacks:
+  - name: iam
+    description: IAM roles and policies
+    environment: dev
+    region: us-west-2
+    use_terragrunt: true
+    resources:
+      # EC2 instance role with instance profile
+      - name: app-server-role
+        type: iam_role
+        variables:
+          description: "Role for application EC2 instances"
+          trusted_services:
+            - "ec2.amazonaws.com"
+          create_instance_profile: true
+          max_session_duration: 3600
+
+      # Lambda execution role
+      - name: lambda-exec-role
+        type: iam_role
+        variables:
+          description: "Execution role for Lambda functions"
+          trusted_services:
+            - "lambda.amazonaws.com"
+          create_instance_profile: false
+
+      # Cross-account role (pass trusted_role_arns at apply time)
+      - name: cross-account-role
+        type: iam_role
+        variables:
+          description: "Role assumable from another AWS account"
+          path: "/cross-account/"
+          max_session_duration: 7200
