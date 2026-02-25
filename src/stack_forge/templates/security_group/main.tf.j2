@@ -22,7 +22,7 @@ resource "aws_security_group" "this" {
 
 # Ingress Rules
 resource "aws_security_group_rule" "ingress" {
-  for_each = { for idx, rule in var.ingress_rules : rule.description => rule }
+  for_each = { for idx, rule in var.ingress_rules : tostring(idx) => rule }
 
   type              = "ingress"
   security_group_id = aws_security_group.this.id
@@ -41,7 +41,7 @@ resource "aws_security_group_rule" "ingress" {
 
 # Egress Rules
 resource "aws_security_group_rule" "egress" {
-  for_each = { for idx, rule in var.egress_rules : rule.description => rule }
+  for_each = { for idx, rule in var.egress_rules : tostring(idx) => rule }
 
   type              = "egress"
   security_group_id = aws_security_group.this.id
