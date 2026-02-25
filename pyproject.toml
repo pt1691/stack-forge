@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
 name = "stack-forge"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Self-Service Infrastructure Templating Engine for Terraform & Terragrunt"
 readme = "README.md"
 license = "MIT"
@@ -52,6 +52,7 @@ dev = [
     "pytest-cov>=4.0.0",
     "ruff>=0.1.0",
     "mypy>=1.0.0",
+    "hatch-vcs>=0.4.0",
 ]
 
 [project.scripts]
@@ -61,6 +62,13 @@ forge = "stack_forge.cli:app"
 Homepage = "https://github.com/pt1691/stack-forge"
 Repository = "https://github.com/pt1691/stack-forge"
 Issues = "https://github.com/pt1691/stack-forge/issues"
+
+[tool.hatch.version]
+source = "vcs"
+tag-pattern = "v(?P<version>[^+]+)"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/stack_forge/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/stack_forge"]
