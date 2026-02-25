@@ -11,7 +11,8 @@ try:
 except ImportError:
     try:
         # Fallback: installed wheel has this in package metadata
-        from importlib.metadata import version, PackageNotFoundError
+        from importlib.metadata import PackageNotFoundError, version
+
         __version__ = version("stack-forge-infra")
     except (ImportError, PackageNotFoundError):
         __version__ = "0.0.0.dev0"
