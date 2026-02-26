@@ -1,6 +1,8 @@
 # 🔨 Stack Forge
 
 [![CI](https://github.com/pt1691/stack-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/pt1691/stack-forge/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/stack-forge-infra.svg)](https://pypi.org/project/stack-forge-infra/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/stack-forge-infra.svg)](https://pypi.org/project/stack-forge-infra/)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
@@ -12,9 +14,7 @@ A CLI tool that generates production-ready Terraform and Terragrunt configuratio
 ## ⚡ 30-Second Quick Start
 
 ```bash
-git clone https://github.com/pt1691/stack-forge.git && cd stack-forge
-python3 -m venv .venv && source .venv/bin/activate
-pip install -e .
+pip install stack-forge-infra
 forge list-templates  # See available templates!
 ```
 
@@ -42,11 +42,13 @@ forge generate  # Creates Terraform files!
 ## 🚀 Installation
 
 ```bash
-git clone https://github.com/pt1691/stack-forge.git
-cd stack-forge
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
+pip install stack-forge-infra
+```
+
+Or with [pipx](https://pipx.pypa.io/) for an isolated global install:
+
+```bash
+pipx install stack-forge-infra
 ```
 
 ## 📖 Workflow Example
@@ -178,7 +180,10 @@ Templates use Jinja2 with these available variables:
 ## 🧪 Development
 
 ```bash
-# Install dev dependencies
+# Clone and install in editable mode
+git clone https://github.com/pt1691/stack-forge.git
+cd stack-forge
+python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
 # Run tests
@@ -187,6 +192,8 @@ pytest
 # Run linter
 ruff check .
 ```
+
+See [RELEASING.md](RELEASING.md) for the release process.
 
 ## 📝 License
 
