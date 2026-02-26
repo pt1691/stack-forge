@@ -33,6 +33,8 @@ mcp = FastMCP(
     instructions="Generate production-ready Terragrunt stacks for AWS infrastructure",
 )
 
+SKILL_PATH = Path(__file__).parent / "TERRAGRUNT_SKILL.md"
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  Models
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1326,6 +1328,14 @@ def get_environment_defaults(environment: str) -> str:
 # ═══════════════════════════════════════════════════════════════════════════════
 #  Resources (context for Claude)
 # ═══════════════════════════════════════════════════════════════════════════════
+
+@mcp.resource("terragrunt://skill")
+def get_skill() -> str:
+    """Full Terragrunt Forge skill reference — resource types, variables, outputs, and dependency patterns."""
+    if SKILL_PATH.exists():
+        return SKILL_PATH.read_text()
+    return "Skill file not found at: " + str(SKILL_PATH)
+
 
 @mcp.resource("terragrunt://conventions")
 def get_conventions() -> str:
