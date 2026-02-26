@@ -39,8 +39,14 @@ The MCP server exposes these tools to Claude:
 ### Prerequisites
 
 ```bash
+# From the stack-forge root
+pip install -e ".[claude-skill]"
+# or manually:
 pip install "mcp[cli]" pydantic
 ```
+
+> **Note:** Use the full path to the Python executable that has `mcp` installed.
+> Using a bare `python` command will fail if VS Code or Claude Desktop can't resolve it from PATH.
 
 ### Configure for Claude Desktop
 
@@ -50,7 +56,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 {
   "mcpServers": {
     "terragrunt-forge": {
-      "command": "python",
+      "command": "/absolute/path/to/stack-forge/.venv/bin/python",
       "args": ["/absolute/path/to/stack-forge/claude-skill/mcp_server.py"],
       "env": {}
     }
@@ -60,14 +66,30 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 
 ### Configure for VS Code (Claude in Copilot)
 
-Add to your `.vscode/mcp.json` or workspace settings:
+Open (or create) `.vscode/mcp.json` at your workspace root.
+
+If your workspace root **is** the `stack-forge` folder:
 
 ```json
 {
   "servers": {
     "terragrunt-forge": {
-      "command": "python",
+      "command": "${workspaceFolder}/.venv/bin/python",
       "args": ["${workspaceFolder}/claude-skill/mcp_server.py"],
+      "env": {}
+    }
+  }
+}
+```
+
+If `stack-forge` is a **subfolder** of your workspace (e.g. `~/Documents/github/`):
+
+```json
+{
+  "servers": {
+    "terragrunt-forge": {
+      "command": "${workspaceFolder}/stack-forge/.venv/bin/python",
+      "args": ["${workspaceFolder}/stack-forge/claude-skill/mcp_server.py"],
       "env": {}
     }
   }
@@ -77,8 +99,8 @@ Add to your `.vscode/mcp.json` or workspace settings:
 ### Test Locally
 
 ```bash
-cd stack-forge/claude-skill
-python mcp_server.py
+cd stack-forge
+.venv/bin/python claude-skill/mcp_server.py
 ```
 
 ---
