@@ -151,6 +151,50 @@ stacks:
           versioning_enabled: true
 ```
 
+## 🤖 Claude AI Integration
+
+Stack Forge ships with a `claude-skill/` directory that supercharges your Terragrunt workflow with Claude AI in two ways:
+
+### 1. Claude Project Knowledge File
+Upload `claude-skill/TERRAGRUNT_SKILL.md` to a [Claude Project](https://claude.ai) to give Claude deep, project-specific knowledge about:
+- All 10 resource types and their variables/outputs
+- Terragrunt directory structure conventions
+- Environment-specific defaults (dev / staging / prod)
+- Security best practices and tagging conventions
+- Dependency chains between resources
+
+### 2. MCP Server (Tool Use)
+The `claude-skill/mcp_server.py` is a [Model Context Protocol](https://modelcontextprotocol.io/) server that exposes 5 tools Claude can call to **generate Terragrunt configs programmatically**:
+
+| Tool | Description |
+|------|-------------|
+| `list_resource_types` | List all supported resource types with descriptions |
+| `generate_terragrunt_project` | Generate a complete multi-environment Terragrunt project |
+| `generate_terraform_module` | Generate a standalone Terraform module for a resource |
+| `generate_child_terragrunt_hcl` | Generate a single child `terragrunt.hcl` |
+| `get_environment_defaults` | Get recommended variable defaults per environment |
+
+**Quick setup (Claude Desktop):**
+
+```bash
+pip install "mcp[cli]" pydantic
+```
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "terragrunt-forge": {
+      "command": "python",
+      "args": ["/path/to/stack-forge/claude-skill/mcp_server.py"]
+    }
+  }
+}
+```
+
+See [claude-skill/README.md](claude-skill/README.md) for full setup instructions including VS Code configuration.
+
 ## 🔧 Custom Templates
 
 Add your own templates in `~/.stack-forge/templates/`:
